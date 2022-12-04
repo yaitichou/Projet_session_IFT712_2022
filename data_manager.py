@@ -8,6 +8,7 @@
 
 import numpy as np
 from sklearn import preprocessing
+import pandas as pd
 import csv
 
 
@@ -58,8 +59,10 @@ def data_extract(path, dataset = 'train'):
 
     attribute_names = data[0] # get the attributes names
     data = np.array(data[1:]) # delete attributes names from dataset
+    
+    df = pd.DataFrame(data, columns = attribute_names) # get the attributes names
 
-    return attribute_names, data, ids, labels
+    return attribute_names, df, ids, labels
 
 def error(predictions,labels):
     """
@@ -85,3 +88,4 @@ def data_cleaning(data):
     cleaned_data = scaler.transform(data)
 
     return cleaned_data
+
