@@ -102,3 +102,4 @@ def data_cleaning(data):
     cleaned_data = scaler.transform(data)
 
     return cleaned_data
+
