@@ -69,19 +69,6 @@ def data_extract(path, dataset = 'train'):
 
     return attribute_names, df, ids, labels
 
-def error(predictions,labels):
-    """
-    Method that computes the error of a model
-    Inputs :
-        - predictions : the predictions of the dataset, shape = (N)
-        - labels : label of the data, shape = (N)
-    Output :
-        - error : the percentage of predictions that don't match the labels
-
-    """
-
-    return 100 * np.sum(np.abs(predictions - labels)) / len(labels)
-
 
 def error(predictions,labels):
     """
