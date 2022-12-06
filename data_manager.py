@@ -81,7 +81,7 @@ def error(predictions,labels):
     """
 
     return 100 * np.sum(np.abs(predictions - labels)) / len(labels)
-    
+
 
 def error(predictions,labels):
     """
