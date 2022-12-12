@@ -10,17 +10,32 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import PrecisionRecallDisplay
 
 
-class Affichage:
+class Util_display:
+    """
+    Class to implement a tool display based on sklearn module metrics and matplotlib.
+
+    Parameters:
+    - model -- model to display.
+    """
     def __init__(self, model) -> None:
         self.model = model
         self.results = model.hyper_search.cv_results_
 
     def hyper_results(self):
+        """
+        reseach the hyper parameters
+
+        Returns a dataframe for parameters
+        """
         df = pd.DataFrame.from_dict(self.model.hyper_search.cv_results_, orient='index').rename_axis(
             'Splits results', axis=0).rename_axis('Split number', axis=1)
         return df
 
     def best_estimators(self, n_top=3):
+        """
+        reseach the best best_estimator
+
+        """
         scorer = "Accuracy"
         for i in range(1, n_top + 1):
             candidates = np.flatnonzero(self.results["rank_test_{}".format(scorer)] == i)
@@ -37,6 +52,12 @@ class Affichage:
                 print("")
 
     def class_report(self, y_true, y_pred, mean_only=True):
+        """
+        generate the report for plot later
+
+        return classfication report (dataframe)
+
+        """
         report = classification_report(y_true, y_pred, target_names=self.model.class_names, zero_division=0, output_dict=True)
         report = pd.DataFrame.from_dict(report, orient='index')
         if mean_only:
@@ -46,6 +67,8 @@ class Affichage:
     def plot(self, param_abscissa):
         """
         Inspired from https://scikit-learn.org/stable/auto_examples/model_selection/plot_multi_metric_evaluation.html 
+
+        plot the graph of results
         """
         plt.figure(figsize=(13, 8))
 
@@ -106,15 +129,3 @@ class Affichage:
         plt.savefig("./graph/{}.png".format(self.model.__class__.__name__), transparent=False)
         plt.show()
 
-    def set(self,nom,socorers,cv_results_):
-        self.model.__class__.__name__ = nom
-        self.model.scorers = socorers
-        self.results = cv_results_
-
-    def printNameAndSocrers(self):
-        print(self.model.__class__.__name__)
-        print(type(self.model.__class__.__name__))
-        print(self.model.scorers)
-        print(type(self.model.scorers))
-        print(self.results)
-        print(type(self.results))

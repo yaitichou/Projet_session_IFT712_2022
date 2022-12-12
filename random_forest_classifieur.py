@@ -15,7 +15,7 @@ from sklearn.metrics import classification_report
 
 class RandForestClassifier(object):
     """
-    Class to implement a decision_trees model based on sklearn module tree.
+    Class to implement a RandForest model based on sklearn module ensemble.
 
     Parameters:
     - x_train (array) -- Array of features values to train on.
