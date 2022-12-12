@@ -37,7 +37,7 @@ def data_extract(path, dataset = 'train'):
     # with the variable name as csv_file
 
     data = []
-    labels = []
+    labels_temp = []
     ids = []
 
     with open(path,'rt') as csv_file:
@@ -51,7 +51,7 @@ def data_extract(path, dataset = 'train'):
             if(dataset == "train"): # training dataset
                 
                 ids.append(row[0]) # get leaf id
-                labels.append(row[1]) # get species label (second column)
+                labels_temp.append(row[1]) # get species label (second column)
                 data.append(row[2:]) # get data rows without id
 
             else: # testing dataset
@@ -62,11 +62,11 @@ def data_extract(path, dataset = 'train'):
 
     attribute_names = data[0] # get the attributes names
     data = np.array(data[1:]) # delete attributes names from dataset
-    labels = np.array(labels[1:])
+    labels = np.array(labels_temp[1:])
 
     df = pd.DataFrame(data, columns = attribute_names) # get the attributes names
 
-    return attribute_names, df, ids, labels
+    return attribute_names, data, ids, labels
 
 
 def error(predictions,labels):

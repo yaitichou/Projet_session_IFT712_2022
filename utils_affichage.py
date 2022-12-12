@@ -105,3 +105,16 @@ class Affichage:
         plt.grid(False)
         plt.savefig("./graph/{}.png".format(self.model.__class__.__name__), transparent=False)
         plt.show()
+
+    def set(self,nom,socorers,cv_results_):
+        self.model.__class__.__name__ = nom
+        self.model.scorers = socorers
+        self.results = cv_results_
+
+    def printNameAndSocrers(self):
+        print(self.model.__class__.__name__)
+        print(type(self.model.__class__.__name__))
+        print(self.model.scorers)
+        print(type(self.model.scorers))
+        print(self.results)
+        print(type(self.results))
