@@ -13,6 +13,7 @@ class DTSClassifier(object):
         self.depth = depth
         self.decision_tree = DecisionTreeClassifier(random_state=0,criterion=criterion, max_depth=depth, min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf)
 
+   
 
     def train(self,data_train,labels):
         self.decision_tree = self.decision_tree.fit(data_train, labels)
