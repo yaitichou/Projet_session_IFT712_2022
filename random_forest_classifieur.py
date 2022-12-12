@@ -1,6 +1,5 @@
 
 
-
 import numpy as np
 import pandas as pd
 from IPython.display import display
@@ -16,7 +15,7 @@ from sklearn.metrics import classification_report
 
 class RandForestClassifier(object):
     """
-    Class to implement a Random Forest model based on sklearn module.
+    Class to implement a decision_trees model based on sklearn module tree.
 
     Parameters:
     - x_train (array) -- Array of features values to train on.
@@ -126,4 +125,8 @@ class RandForestClassifier(object):
 
         Returns a encoded class label for each sample.
         """
-        return self.estimator.predict(X)
+        class_label = self.estimator.predict(X)
+        return class_label
+
+        
+
