@@ -8,7 +8,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
-
+from sklearn.multioutput import MultiOutputClassifier
 
 
 class svmClassifier(object):
@@ -23,15 +23,15 @@ class svmClassifier(object):
         self.num_features = x_train.shape[1]
         self.num_classes = class_names.shape
 
-        self.estimator = SVC()
+        self.estimator = MultiOutputClassifier(SVC(probability=True), n_jobs=4)
         self.scorers = scorers
 
     def train_sans_grid(self):
-        adaboost = self.estimator
-        adaboost.fit(self.x_train, self.y_train)
-        pred = adaboost.predict(self.x_train)
+        svm = self.estimator
+        svm.fit(self.x_train, self.y_train)
+        pred = svm.predict(self.x_train)
         accura_tr = accuracy_score(self.y_train, pred)
-        pred_val = adaboost.predict(self.x_val)
+        pred_val = svm.predict(self.x_val)
         accura_val = accuracy_score(self.y_val, pred_val)
 
         return accura_tr, accura_val
@@ -91,7 +91,6 @@ class svmClassifier(object):
         """
         class_label = self.estimator.predict(X)
         return class_label
-
 
 
 
