@@ -62,7 +62,7 @@ def data_extract(path, dataset = 'train'):
 
     attribute_names = data[0] # get the attributes names
     data = np.array(data[1:]) # delete attributes names from dataset
-    labels = np.array(labels[1:])
+    labels = np.array(labels_temp[1:])
 
     df = pd.DataFrame(data, columns = attribute_names) # get the attributes names
 

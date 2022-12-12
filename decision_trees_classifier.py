@@ -1,105 +1,85 @@
-
-
-
 import numpy as np
 import pandas as pd
-from sklearn import tree
-from sklearn.model_selection import KFold 
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
 from sklearn.tree import DecisionTreeClassifier
-
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score as ac
+from sklearn.metrics import precision_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report
 
 
 class DTSClassifier(object):
-    def __init__(self, x_train, y_train, x_val, y_val, class_names,scorers, depth = 1, criterion = "gini"):
-        self.x_train = x_train
-        self.y_train = y_train
-        self.scorers = scorers
-        self.x_val = x_val
-        self.y_val = y_val
-        self.class_names = class_names
-
-        self.num_features = x_train.shape[1]
-        self.num_classes = class_names.shape
-
-        self.estimator = DecisionTreeClassifier(criterion=criterion, max_depth=depth)
+    def __init__(self, depth = 1,  min_samples_split = 2, min_samples_leaf = 1, criterion = "gini"):
+        self.depth = depth
+        self.decision_tree = DecisionTreeClassifier(random_state=0,criterion=criterion, max_depth=depth, min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf)
 
 
     def train(self,data_train,labels):
         self.decision_tree = self.decision_tree.fit(data_train, labels)
         
-    def plot_tree(self):
-        tree.plot_tree(self.decision_tree)
+    
+    def cross_validation(self,data_train,labels,depth_list,split_list,criterion_list,min_samples_leaf_list):
+        grilleRecherche = list()
+        
+        for grid_min_sample_leaf in min_samples_leaf_list:
+            for grid_criterion in criterion_list:
+                for grid_split in split_list:
+                    for grid_depth in depth_list:
+                        grilleRecherche.append({"depth": grid_depth, "min_samples_split": grid_split, "criterion":grid_criterion,"min_samples_leaf":grid_min_sample_leaf})
+        
+        k = 5
+
+        kf = KFold(n_splits=k, random_state=None, shuffle=True)
+        accuracy_hyperparameter = {}
+        precision_hyperparameter = {}
+        f1_hyperparameter = {}
+        for hyper in range(len(grilleRecherche)):
+
+            min_samples_leaf = grilleRecherche[hyper]["min_samples_leaf"]
+            criterion = grilleRecherche[hyper]["criterion"]
+            depth = grilleRecherche[hyper]["depth"]
+            min_samples_split = grilleRecherche[hyper]["min_samples_split"]
+
+            decision_tree = DTSClassifier(depth = depth, min_samples_split=min_samples_split, criterion=criterion,min_samples_leaf=min_samples_leaf)
+            accuracy = 0
+            precision = 0
+            f1 = 0
+            for train_index, validation_index in kf.split(labels):
+
+                X_train, X_validation = data_train[train_index], data_train[validation_index]
+                y_train, y_validation = labels[train_index], labels[validation_index]
+
+                decision_tree.train(X_train,y_train) # train the model
+
+                predictions = decision_tree.predict(X_validation)
+                accuracy += ac(y_validation,predictions) # compute the accuracy
+                precision += precision_score(y_validation,predictions, average = "micro") # compute the precision
+                f1 += f1_score(y_validation,predictions, average = "micro") # compute the precision
+            
+            accuracy_hyperparameter[hyper] = accuracy / k
+            precision_hyperparameter[hyper] = precision / k
+            f1_hyperparameter[hyper] = f1 / k
+            
+        hyper = max(accuracy_hyperparameter, key=accuracy_hyperparameter.get)
+        print("Best hyperparameters:", grilleRecherche[hyper])
+
+        self.decision_tree = DecisionTreeClassifier(random_state=0, max_depth=grilleRecherche[hyper]["depth"],min_samples_split =grilleRecherche[hyper]["min_samples_split"],criterion=grilleRecherche[hyper]["criterion"],min_samples_leaf=grilleRecherche[hyper]["min_samples_leaf"])
+        self.decision_tree = self.decision_tree.fit(data_train, labels)
+
+        return accuracy_hyperparameter[hyper], f1_hyperparameter[hyper], precision_hyperparameter[hyper]
+
 
     def predict(self, X):
-        """
-        Use the trained model to predict the sample's class.
-        X: A list containing one or many samples.
 
-        Returns a encoded class label for each sample.
-        """
-        class_label = self.estimator.predict(X)
-        return class_label
-    
+        if len(X.shape) == 1:  # Predict on one sample
+            class_label = np.array([self.decision_tree.predict(X)])
+            return class_label
 
-    def train_without_grid(self):
-        adaboost = self.estimator
-        adaboost.fit(self.x_train, self.y_train)
-        pred = adaboost.predict(self.x_train)
-        accura_tr = accuracy_score(self.y_train, pred)
-        pred_val = adaboost.predict(self.x_val)
-        accura_val = accuracy_score(self.y_val, pred_val)
-
-        return accura_tr, accura_val
-
-    def train(self, grid_search_params={}, random_search=True):
-        """
-        Train the model with a cross-entropy loss naive implementation (with loop)
-
-        Inputs:
-        - grid_search_params (dict) -- dictionnary of values to test in the grid search
-
-        Returns a tuple for:
-        - training loss
-        - validation loss
-        - training accuracy
-        - validation accuracy
-        """
-        # Grid search init with kfold
-        searching_params = {
-            "refit": "Accuracy",
-            "scoring": self.scorers,
-            "cv": KFold(n_splits=5, shuffle=True),
-            "return_train_score": True,
-            "n_jobs": 4,
-            "verbose": 1}
-
-        if random_search:
-            print("Using randomized search:")
-            search_g = RandomizedSearchCV(self.estimator, grid_search_params).set_params(**searching_params)
-        else:
-            print("Using complete search:")
-            search_g = GridSearchCV(self.estimator, grid_search_params).set_params(**searching_params)
-
-        # Model training
-        search_g.fit(self.x_train, self.y_train)
-
-        # Save best estimator and print it with the best accuracy obtained through cross validation
-        self.estimator = search_g.best_estimator_
-        self.best_accuracy = search_g.best_score_
-        self.hyper_search = search_g
-        # Predictions on train and validation data
-        pred_train = search_g.predict(self.x_train)
-        pred_val = search_g.predict(self.x_val)
-
-        # Train and validation accuracy
-        acc_train = accuracy_score(self.y_train, pred_train)
-        acc_val = accuracy_score(self.y_val, pred_val)
-
-        return acc_train, acc_val, self.estimator, self.best_accuracy
-
+        elif len(X.shape) == 2:  # Predict on multiple samples
+            class_label = []
+            for index in range(X.shape[0]):
+                class_label.append(self.decision_tree.predict(X[index].reshape(1,-1))[0])
+            return class_label
 
         
+
