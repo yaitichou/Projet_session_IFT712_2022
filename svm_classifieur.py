@@ -11,7 +11,18 @@ from sklearn.metrics import classification_report
 from sklearn.multioutput import MultiOutputClassifier
 
 
-class svmClassifier(object):
+class SvmClassifier(object):
+    """
+    Class to implement a svm model based on sklearn svm.
+
+    Parameters:
+    - x_train (array) -- Array of features values to train on.
+    - y_train (array) -- Array of true labels to train the model.
+    - x_val (array) -- Array of features values to validate the model.
+    - y_val (array) -- Array of true labels to validate the model.
+    - class_names (array) -- Array of names to link with labels
+    """
+
     def __init__(self, x_train, y_train, x_val, y_val, class_names, scorers):
         self.x_train = x_train
         self.y_train = y_train
@@ -27,6 +38,14 @@ class svmClassifier(object):
         self.scorers = scorers
 
     def train_sans_grid(self):
+        """
+        Train the model without a grid search
+
+        Returns a tuple for:
+        - training accuracy
+        - validation accuracy
+        """
+        
         svm = self.estimator
         svm.fit(self.x_train, self.y_train)
         pred = svm.predict(self.x_train)

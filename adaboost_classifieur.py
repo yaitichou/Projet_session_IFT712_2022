@@ -12,7 +12,18 @@ from sklearn.metrics import classification_report
 from sklearn.multioutput import MultiOutputClassifier
 
 
-class adaboostClassifier(object):
+class AdaboostClassifier(object):
+    """
+    Class to implement a adaboost model based on sklearn module ensemble.
+
+    Parameters:
+    - x_train (array) -- Array of features values to train on.
+    - y_train (array) -- Array of true labels to train the model.
+    - x_val (array) -- Array of features values to validate the model.
+    - y_val (array) -- Array of true labels to validate the model.
+    - class_names (array) -- Array of names to link with labels
+    """
+
     def __init__(self, x_train, y_train, x_val, y_val, class_names, scorers):
         self.x_train = x_train
         self.y_train = y_train
@@ -28,6 +39,13 @@ class adaboostClassifier(object):
         self.scorers = scorers
 
     def train_sans_grid(self):
+        """
+        Train the model without a grid search
+
+        Returns a tuple for:
+        - training accuracy
+        - validation accuracy
+        """
         adaboost = self.estimator
         adaboost.fit(self.x_train, self.y_train)
         pred = adaboost.predict(self.x_train)
@@ -39,16 +57,18 @@ class adaboostClassifier(object):
 
     def train(self, grid_search_params={}, random_search=True):
         """
-        Train the model with a cross-entropy loss naive implementation (with loop)
+        Train the model with a grid search and a cross validation
 
         Inputs:
-        - grid_search_params (dict) -- dictionnary of values to test in the grid search
+        - grid_search_params (dict) -- Dictionnary with values to test in the grid search. If not given, it will use the estimator's default values.
+        - random_search (bool), default=True -- If True use the Randimized Search, 
+                if False search all combination of parameters (take longer time).
 
         Returns a tuple for:
-        - training loss
-        - validation loss
         - training accuracy
         - validation accuracy
+        - best estiimator
+        - best score
         """
         # Grid search init with kfold
         searching_params = {

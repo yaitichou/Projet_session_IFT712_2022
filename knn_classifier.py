@@ -10,7 +10,7 @@ from sklearn.metrics import classification_report
 
 class KNNClassifier(object):
     """
-    Class to implement a decision_trees model based on sklearn module tree.
+    Class to implement a knn model based on sklearn module neighbors.
 
     Parameters:
     - x_train (array) -- Array of features values to train on.
@@ -63,10 +63,10 @@ class KNNClassifier(object):
                 if False search all combination of parameters (take longer time).
 
         Returns a tuple for:
-        - training loss
-        - validation loss
         - training accuracy
         - validation accuracy
+        - best estiimator
+        - best score
         """
         # Grid search init with kfold
         searching_params = {
